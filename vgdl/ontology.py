@@ -39,6 +39,27 @@ RIGHT = (1, 0)
 
 BASEDIRS = [UP, LEFT, DOWN, RIGHT]
 
+colorDict = {str((0, 200, 0)): 'GREEN',\
+            str((0, 0, 200)): 'BLUE',\
+            str((200, 0, 0)): 'RED',\
+            str((90, 90, 90)): 'GRAY',\
+            str((250, 250, 250)): 'WHITE',\
+            str((140, 120, 100)): 'BROWN',\
+            str((0, 0, 0)): 'BLACK',\
+            str((250, 160, 0)): 'ORANGE',\
+            str((250, 250, 0)): 'YELLOW',\
+            str((250, 200, 200)): 'PINK',\
+            str((250, 212, 0)): 'GOLD',\
+            str((250, 50, 50)): 'LIGHTRED',\
+            str((250, 200, 100)): 'LIGHTORANGE',\
+            str((50, 100, 250)): 'LIGHTBLUE',\
+            str((50, 250, 50)): 'LIGHTGREEN',\
+            str((150, 150, 150)): 'LIGHTGRAY',\
+            str((30, 30, 30)): 'DARKGRAY',\
+            str((20, 20, 100)): 'DARKBLUE',\
+            }
+
+
 # ---------------------------------------------------------------------
 #     Types of physics
 # ---------------------------------------------------------------------
@@ -508,7 +529,16 @@ class FlakAvatar(HorizontalAvatar, SpriteProducer):
     def _shoot(self, game):
         from pygame.locals import K_SPACE
         if self.stype and game.keystate[K_SPACE]:
-            game._createSprite([self.stype], (self.rect.left, self.rect.top))
+            spawn = game._createSprite([self.stype], (self.rect.left, self.rect.top))
+            if spawn:	
+			    ## Print event tuple
+			    resources = dict(self.resources)
+			    action = "K_SPACE"
+			    agent_color = colorDict[str(self.color)]
+			    obj_color = colorDict[str(spawn[0].color)]
+			    effect = "SPAWN"
+			    event_tuple = (resources, action, [(agent_color, obj_color, effect)])
+			    print event_tuple
 
 class OrientedAvatar(OrientedSprite, MovingAvatar):
     """ Avatar retains its orientation, but moves in cardinal directions. """
@@ -724,6 +754,11 @@ class MultiSpriteCounter(Termination):
 def killSprite(sprite, partner, game):
     """ Kill command """
     game.kill_list.append(sprite)
+    if not None in {sprite, partner}:
+        sprite_info = colorDict[str(sprite.color)]
+        partner_info = colorDict[str(partner.color)]
+        return ("killSprite",partner_info,sprite_info) # partner = agent, sprite = what's being killed
+
 
 def cloneSprite(sprite, partner, game):
     game._createSprite([sprite.name], (sprite.rect.left, sprite.rect.top))
@@ -738,16 +773,24 @@ def transformTo(sprite, partner, game, stype='wall'):
 def stepBack(sprite, partner, game):
     """ Revert last move. """
     sprite.rect = sprite.lastrect
+    sprite_info = colorDict[str(sprite.color)]
+    partner_info = colorDict[str(partner.color)]
+    return ("stepBack",sprite_info,partner_info)
 
 def undoAll(sprite, partner, game):
     """ Revert last moves of all sprites. """
+    #print 'undo', colorDict[str(sprite.color)], colorDict[str(partner.color)]
+    print 
     for s in game:
         s.rect = s.lastrect
+    return ('undoAll', colorDict[str(sprite.color)], colorDict[str(partner.color)])
 
 def bounceForward(sprite, partner, game):
     """ The partner sprite pushed, so if possible move in the opposite direction. """
     sprite.physics.activeMovement(sprite, unitVector(partner.lastdirection))
     game._updateCollisionDict(sprite)
+    return ('bounceForward', colorDict[str(partner.color)], colorDict[str(sprite.color)])
+
 
 def conveySprite(sprite, partner, game):
     """ Moves the partner in target direction by some step size. """
@@ -858,11 +901,18 @@ def collectResource(sprite, partner, game):
     """ Adds/increments the resource type of sprite in partner """
     assert isinstance(sprite, Resource)
     r = sprite.resourceType
-    partner.resources[r] = max(0, min(partner.resources[r]+sprite.value, game.resources_limits[r]))
+    partner.resources[r] = max(-1, min(partner.resources[r]+sprite.value, game.resources_limits[r]))
+    #print 'Collected ', colorDict[str(sprite.color)]#partner.resources[r]
+    return ('collectResource', colorDict[str(partner.color)], colorDict[str(sprite.color)])
 
 def changeResource(sprite, partner, game, resource, value=1):
     """ Increments a specific resource type in sprite """
-    sprite.resources[resource] = max(0, min(sprite.resources[resource]+value, game.resources_limits[resource]))
+    sprite.resources[resource] = max(-1, min(sprite.resources[resource]+value, game.resources_limits[resource]))
+    #print resource, sprite.resources[resource]
+    #print 'Changed ', colorDict[str(partner.color)]
+
+    # NOTE: partner is the color of the resource (see _eventHandling() in core.py)
+    return ('changeResource', colorDict[str(sprite.color)], colorDict[str(partner)], value)
 
 def spawnIfHasMore(sprite, partner, game, resource, stype, limit=1):
     """ If 'sprite' has more than a limit of the resource type given, it spawns a sprite of 'stype'. """
