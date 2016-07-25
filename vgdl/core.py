@@ -293,15 +293,14 @@ class BasicGame(object):
         if(headless):
             os.environ["SDL_VIDEODRIVER"] = "dummy"
             pygame.display.init()
-            self.screen = pygame.display.set_mode(size)
-            self.background = pygame.Surface(size)
         else:
-            from ontology import LIGHTGRAY
             pygame.init()
-            self.screen = pygame.display.set_mode(size)
-            self.background = pygame.Surface(size)
-            self.background.fill(LIGHTGRAY)
-            self.screen.blit(self.background, (0,0))
+        
+        from ontology import LIGHTGRAY
+        self.screen = pygame.display.set_mode(size)
+        self.background = pygame.Surface(size)
+        self.background.fill(LIGHTGRAY)
+        self.screen.blit(self.background, (0,0))
 
     def __iter__(self):
         """ Iterator over all sprites (ordered) """
@@ -578,8 +577,8 @@ class BasicGame(object):
 
         #self.clock.tick(self.frame_rate)
         self.time += 1
-        #if not headless:
-        self._clearAll()
+        if not headless:
+            self._clearAll()
 
         # gather events
         pygame.event.pump()
@@ -610,10 +609,10 @@ class BasicGame(object):
 
         # handle collision effects
         self._eventHandling()
-        #if not headless:
-        self._drawAll()
-        pygame.display.update(VGDLSprite.dirtyrects)
-        VGDLSprite.dirtyrects = []
+        if not headless:
+            self._drawAll()
+            pygame.display.update(VGDLSprite.dirtyrects)
+            VGDLSprite.dirtyrects = []
 
         return None, None
 
