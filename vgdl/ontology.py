@@ -39,24 +39,24 @@ RIGHT = (1, 0)
 
 BASEDIRS = [UP, LEFT, DOWN, RIGHT]
 
-colorDict = {str((0, 200, 0)): 'GREEN',\
-            str((0, 0, 200)): 'BLUE',\
-            str((200, 0, 0)): 'RED',\
-            str((90, 90, 90)): 'GRAY',\
-            str((250, 250, 250)): 'WHITE',\
-            str((140, 120, 100)): 'BROWN',\
-            str((0, 0, 0)): 'BLACK',\
-            str((250, 160, 0)): 'ORANGE',\
-            str((250, 250, 0)): 'YELLOW',\
-            str((250, 200, 200)): 'PINK',\
-            str((250, 212, 0)): 'GOLD',\
-            str((250, 50, 50)): 'LIGHTRED',\
-            str((250, 200, 100)): 'LIGHTORANGE',\
-            str((50, 100, 250)): 'LIGHTBLUE',\
-            str((50, 250, 50)): 'LIGHTGREEN',\
-            str((150, 150, 150)): 'LIGHTGRAY',\
-            str((30, 30, 30)): 'DARKGRAY',\
-            str((20, 20, 100)): 'DARKBLUE',\
+colorDict = {(0, 200, 0): 'GREEN',\
+            (0, 0, 200): 'BLUE',\
+            (200, 0, 0): 'RED',\
+            (90, 90, 90): 'GRAY',\
+            (250, 250, 250): 'WHITE',\
+            (140, 120, 100): 'BROWN',\
+            (0, 0, 0): 'BLACK',\
+            (250, 160, 0): 'ORANGE',\
+            (250, 250, 0): 'YELLOW',\
+            (250, 200, 200): 'PINK',\
+            (250, 212, 0): 'GOLD',\
+            (250, 50, 50): 'LIGHTRED',\
+            (250, 200, 100): 'LIGHTORANGE',\
+            (50, 100, 250): 'LIGHTBLUE',\
+            (50, 250, 50): 'LIGHTGREEN',\
+            (150, 150, 150): 'LIGHTGRAY',\
+            (30, 30, 30): 'DARKGRAY',\
+            (20, 20, 100): 'DARKBLUE',\
             }
 
 
@@ -534,8 +534,8 @@ class FlakAvatar(HorizontalAvatar, SpriteProducer):
 			    ## Print event tuple
 			    resources = dict(self.resources)
 			    action = "K_SPACE"
-			    agent_color = colorDict[str(self.color)]
-			    obj_color = colorDict[str(spawn[0].color)]
+			    agent_color = colorDict[self.color]
+			    obj_color = colorDict[spawn[0].color]
 			    effect = "SPAWN"
 			    event_tuple = (resources, action, [(agent_color, obj_color, effect)])
 			    print event_tuple
@@ -755,8 +755,8 @@ def killSprite(sprite, partner, game):
     """ Kill command """
     game.kill_list.append(sprite)
     if not None in {sprite, partner}:
-        sprite_info = colorDict[str(sprite.color)]
-        partner_info = colorDict[str(partner.color)]
+        sprite_info = colorDict[sprite.color]
+        partner_info = colorDict[partner.color]
         return ("killSprite",partner_info,sprite_info) # partner = agent, sprite = what's being killed
 
 
@@ -773,23 +773,23 @@ def transformTo(sprite, partner, game, stype='wall'):
 def stepBack(sprite, partner, game):
     """ Revert last move. """
     sprite.rect = sprite.lastrect
-    sprite_info = colorDict[str(sprite.color)]
-    partner_info = colorDict[str(partner.color)]
+    sprite_info = colorDict[sprite.color]
+    partner_info = colorDict[partner.color]
     return ("stepBack",sprite_info,partner_info)
 
 def undoAll(sprite, partner, game):
     """ Revert last moves of all sprites. """
-    #print 'undo', colorDict[str(sprite.color)], colorDict[str(partner.color)]
+    #print 'undo', colorDict[sprite.color], colorDict[partner.color]
     print 
     for s in game:
         s.rect = s.lastrect
-    return ('undoAll', colorDict[str(sprite.color)], colorDict[str(partner.color)])
+    return ('undoAll', colorDict[sprite.color], colorDict[partner.color])
 
 def bounceForward(sprite, partner, game):
     """ The partner sprite pushed, so if possible move in the opposite direction. """
     sprite.physics.activeMovement(sprite, unitVector(partner.lastdirection))
     game._updateCollisionDict(sprite)
-    return ('bounceForward', colorDict[str(partner.color)], colorDict[str(sprite.color)])
+    return ('bounceForward', colorDict[partner.color], colorDict[sprite.color])
 
 
 def conveySprite(sprite, partner, game):
@@ -902,17 +902,17 @@ def collectResource(sprite, partner, game):
     assert isinstance(sprite, Resource)
     r = sprite.resourceType
     partner.resources[r] = max(-1, min(partner.resources[r]+sprite.value, game.resources_limits[r]))
-    #print 'Collected ', colorDict[str(sprite.color)]#partner.resources[r]
-    return ('collectResource', colorDict[str(partner.color)], colorDict[str(sprite.color)])
+    #print 'Collected ', colorDict[sprite.color]#partner.resources[r]
+    return ('collectResource', colorDict[partner.color], colorDict[sprite.color])
 
 def changeResource(sprite, partner, game, resource, value=1):
     """ Increments a specific resource type in sprite """
     sprite.resources[resource] = max(-1, min(sprite.resources[resource]+value, game.resources_limits[resource]))
     #print resource, sprite.resources[resource]
-    #print 'Changed ', colorDict[str(partner.color)]
+    #print 'Changed ', colorDict[partner.color]
 
     # NOTE: partner is the color of the resource (see _eventHandling() in core.py)
-    return ('changeResource', colorDict[str(sprite.color)], colorDict[str(partner)], value)
+    return ('changeResource', colorDict[sprite.color], colorDict[partner], value)
 
 def spawnIfHasMore(sprite, partner, game, resource, stype, limit=1):
     """ If 'sprite' has more than a limit of the resource type given, it spawns a sprite of 'stype'. """
