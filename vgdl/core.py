@@ -196,7 +196,7 @@ class BasicGame(object):
         self.num_sprites = 0
         self.kill_list=[]
 
-    def buildLevel(self, lstr):
+    def buildLevel(self, lstr, block_size=None):
         from ontology import stochastic_effects
         lines = [l for l in lstr.split("\n") if len(l)>0]
         lengths = map(len, lines)
@@ -205,7 +205,11 @@ class BasicGame(object):
         self.height = len(lines)
         assert self.width > 1 and self.height > 1, "Level too small."
         # rescale pixels per block to adapt to the level
-        self.block_size = max(2,int(800./max(self.width, self.height)))
+        if block_size is None:
+            self.block_size = max(2,int(800./max(self.width, self.height)))
+            print("block size:", self.block_size)
+        else:
+          self.block_size = block_size
         self.screensize = (self.width*self.block_size, self.height*self.block_size)
 
         # set up resources
