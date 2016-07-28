@@ -435,6 +435,7 @@ class BasicGame(object):
                 del self.lastcollisions[key]
 
     def _eventHandling(self):
+        events = []
         self.lastcollisions = {}
         ss = self.lastcollisions
         for g1, g2, effect, kwargs in self.collision_eff:
@@ -483,15 +484,15 @@ class BasicGame(object):
                     # deal with the collision effects
                     if score:
                         self.score += score
-                    if switch:
-                        # CHECKME: this is not a bullet-proof way, but seems to work
-                        if s2 not in self.kill_list:
-                            effect(s2, s1, self, **kwargs)
-                    else:
-                        # CHECKME: this is not a bullet-proof way, but seems to work
-                        if s1 not in self.kill_list:
-                            effect(s1, s2, self, **kwargs)
-
+                    
+                    s1_, s2_ = (s2, s1) if switch else (s1, s2)
+                    
+                    # CHECKME: this is not a bullet-proof way, but seems to work
+                    event = effect(s1_, s2_, self, **kwargs)
+                    if event is not None:
+                        events.append(event)
+        
+        return events
 
     def startGame(self, headless, persist_movie):
         self._initScreen(self.screensize,headless)
@@ -604,7 +605,7 @@ class BasicGame(object):
         for t in self.terminations:
                 self.ended, win = t.isDone(self)
                 if self.ended:
-                    return win, self.score
+                    return win, self.score, []
             # update sprites
         #print action
 
@@ -612,19 +613,14 @@ class BasicGame(object):
             s.update(self)
 
         # handle collision effects
-        self._eventHandling()
+        events = self._eventHandling()
         if not headless:
             self._drawAll()
             pygame.display.update(VGDLSprite.dirtyrects)
             VGDLSprite.dirtyrects = []
 
-        return None, None
-
-
-
-
-
-
+        # FIXME: why is the score None?
+        return None, None, events
 
 class VGDLSprite(object):
     """ Base class for all sprite types. """
