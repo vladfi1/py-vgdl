@@ -301,7 +301,7 @@ class BasicGame(object):
             pygame.init()
         
         from ontology import LIGHTGRAY
-        self.screen = pygame.display.set_mode(size)
+        self.screen = pygame.display.set_mode(size, 0, 24)
         self.background = pygame.Surface(size)
         self.background.fill(LIGHTGRAY)
         self.screen.blit(self.background, (0,0))
