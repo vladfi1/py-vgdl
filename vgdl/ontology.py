@@ -529,7 +529,7 @@ class FlakAvatar(HorizontalAvatar, SpriteProducer):
 			    obj_color = colorDict[spawn[0].color]
 			    effect = "SPAWN"
 			    event_tuple = (resources, action, [(agent_color, obj_color, effect)])
-			    print event_tuple
+			    #print event_tuple
 
 class OrientedAvatar(OrientedSprite, MovingAvatar):
     """ Avatar retains its orientation, but moves in cardinal directions. """
@@ -771,7 +771,6 @@ def stepBack(sprite, partner, game):
 def undoAll(sprite, partner, game):
     """ Revert last moves of all sprites. """
     #print 'undo', colorDict[sprite.color], colorDict[partner.color]
-    print 
     for s in game:
         s.rect = s.lastrect
     return ('undoAll', colorDict[sprite.color], colorDict[partner.color])
@@ -903,7 +902,7 @@ def changeResource(sprite, partner, game, resource, value=1):
     #print 'Changed ', colorDict[partner.color]
 
     # NOTE: partner is the color of the resource (see _eventHandling() in core.py)
-    return ('changeResource', colorDict[sprite.color], colorDict[partner], value)
+    return ('changeResource', colorDict[sprite.color], colorDict[partner])#, value)
 
 def spawnIfHasMore(sprite, partner, game, resource, stype, limit=1):
     """ If 'sprite' has more than a limit of the resource type given, it spawns a sprite of 'stype'. """
