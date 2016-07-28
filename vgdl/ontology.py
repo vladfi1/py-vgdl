@@ -9,28 +9,33 @@ from math import sqrt
 import pygame
 from tools import triPoints, unitVector, vectNorm, oncePerStep
 from ai import AStarWorld
+from collections import OrderedDict
 
 # ---------------------------------------------------------------------
 #     Constants
 # ---------------------------------------------------------------------
-GREEN = (0, 200, 0)
-BLUE = (0, 0, 200)
-RED = (200, 0, 0)
-GRAY = (90, 90, 90)
-WHITE = (250, 250, 250)
-BROWN = (140, 120, 100)
-BLACK = (0, 0, 0)
-ORANGE = (250, 160, 0)
-YELLOW = (250, 250, 0)
-PINK = (250, 200, 200)
-GOLD = (250, 212, 0)
-LIGHTRED = (250, 50, 50)
-LIGHTORANGE = (250, 200, 100)
-LIGHTBLUE = (50, 100, 250)
-LIGHTGREEN = (50, 250, 50)
-LIGHTGRAY = (150, 150, 150)
-DARKGRAY = (30, 30, 30)
-DARKBLUE = (20, 20, 100)
+colors = dict(
+    GREEN = (0, 200, 0),
+    BLUE = (0, 0, 200),
+    RED = (200, 0, 0),
+    GRAY = (90, 90, 90),
+    WHITE = (250, 250, 250),
+    BROWN = (140, 120, 100),
+    BLACK = (0, 0, 0),
+    ORANGE = (250, 160, 0),
+    YELLOW = (250, 250, 0),
+    PINK = (250, 200, 200),
+    GOLD = (250, 212, 0),
+    LIGHTRED = (250, 50, 50),
+    LIGHTORANGE = (250, 200, 100),
+    LIGHTBLUE = (50, 100, 250),
+    LIGHTGREEN = (50, 250, 50),
+    LIGHTGRAY = (150, 150, 150),
+    DARKGRAY = (30, 30, 30),
+    DARKBLUE = (20, 20, 100),
+).items()
+
+colors = OrderedDict(sorted(colors, key=lambda (k, _): k))
 
 UP = (0, -1)
 DOWN = (0, 1)
@@ -39,26 +44,12 @@ RIGHT = (1, 0)
 
 BASEDIRS = [UP, LEFT, DOWN, RIGHT]
 
-colorDict = {(0, 200, 0): 'GREEN',\
-            (0, 0, 200): 'BLUE',\
-            (200, 0, 0): 'RED',\
-            (90, 90, 90): 'GRAY',\
-            (250, 250, 250): 'WHITE',\
-            (140, 120, 100): 'BROWN',\
-            (0, 0, 0): 'BLACK',\
-            (250, 160, 0): 'ORANGE',\
-            (250, 250, 0): 'YELLOW',\
-            (250, 200, 200): 'PINK',\
-            (250, 212, 0): 'GOLD',\
-            (250, 50, 50): 'LIGHTRED',\
-            (250, 200, 100): 'LIGHTORANGE',\
-            (50, 100, 250): 'LIGHTBLUE',\
-            (50, 250, 50): 'LIGHTGREEN',\
-            (150, 150, 150): 'LIGHTGRAY',\
-            (30, 30, 30): 'DARKGRAY',\
-            (20, 20, 100): 'DARKBLUE',\
-            }
+colorDict = {color: name for name, color in colors.items()}
+colorIndices = {color: index for index, color in enumerate(colors.keys())}
 
+# hack so that everything still works
+for name, color in colors.items():
+    locals()[name] = color
 
 # ---------------------------------------------------------------------
 #     Types of physics
@@ -130,12 +121,12 @@ from core import VGDLSprite, Resource
 
 class Immovable(VGDLSprite):
     """ A gray square that does not budge. """
-    color = GRAY
+    color = colors['GRAY']
     is_static = True
 
 class Passive(VGDLSprite):
     """ A square that may budge. """
-    color = RED
+    color = colors['RED']
 
 class ResourcePack(Resource):
     """ Can be collected, and in that case adds/increases a progress bar on the collecting sprite.
@@ -144,7 +135,7 @@ class ResourcePack(Resource):
 
 class Flicker(VGDLSprite):
     """ A square that persists just a few timesteps. """
-    color = RED
+    color = colors['RED']
     limit = 1
     def __init__(self, **kwargs):
         self._age = 0
@@ -174,12 +165,12 @@ class SpriteProducer(VGDLSprite):
 
 class Portal(SpriteProducer):
     is_static = True
-    color = BLUE
+    color = colors['BLUE']
 
 class SpawnPoint(SpriteProducer):
     prob = None
     total = None
-    color = BLACK
+    color = colors['BLACK']
     cooldown = None
     is_static = True
     def __init__(self, cooldown=1, prob=1, total=None, **kwargs):
@@ -226,7 +217,7 @@ class Conveyor(OrientedSprite):
     """ A static object that used jointly with the 'conveySprite' interaction to move
     other sprites around."""
     is_static = True
-    color = BLUE
+    color = colors['BLUE']
     strength = 1
     draw_arrow = True
 
@@ -286,7 +277,7 @@ class ErraticMissile(Missile):
             self.orientation = choice(BASEDIRS)
 
 class Bomber(SpawnPoint, Missile):
-    color = ORANGE
+    color = colors['ORANGE']
     is_static = False
     def update(self, game):
         Missile.update(self, game)
@@ -434,7 +425,7 @@ from core import Avatar
 
 class MovingAvatar(VGDLSprite, Avatar):
     """ Default avatar, moves in the 4 cardinal directions. """
-    color = WHITE
+    color = colors['WHITE']
     speed = 1
     is_avatar = True
     alternate_keys=False
@@ -521,7 +512,7 @@ class FlakAvatar(HorizontalAvatar, SpriteProducer):
         actions["SPACE"] = K_SPACE
         return actions
 
-    color = GREEN
+    color = colors['GREEN']
     def update(self, game):
         HorizontalAvatar.update(self, game)
         self._shoot(game)
