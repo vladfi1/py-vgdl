@@ -588,8 +588,9 @@ class BasicGame(object):
         # gather events
         pygame.event.pump()
         self.keystate = list(pygame.key.get_pressed())
-
-        self.keystate[action] = 1
+        
+        if action is not None:
+            self.keystate[action] = 1
 
             # load/save handling
         #if self.load_save_enabled:

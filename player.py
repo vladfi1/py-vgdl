@@ -7,7 +7,7 @@ from numpy import random
 import numpy as np
 from vgdl.ontology import colors, colorIndices
 
-keys = [K_SPACE, K_UP, K_DOWN, K_RIGHT, K_LEFT]
+keys = [None, K_SPACE, K_UP, K_DOWN, K_RIGHT, K_LEFT]
 key2index = {k: i for i, k in enumerate(keys)}
 
 color2index = {color: colorIndices[name] for name, color in colors.items()}
