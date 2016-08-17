@@ -11,7 +11,8 @@ sequence_length = 50
 frames_nxy = tf.placeholder(tf.int64, [sequence_length, None, None])
 
 actions_n = tf.placeholder(tf.int64, [sequence_length])
-actions_bn = tf.expand_dums(actions_n, 0)
+actions_na = tf.one_hot(actions_n, 6) # num_actions
+actions_bna = tf.expand_dims(actions_na, 0)
 
 image_dims = tf.shape(frames_nxy)[1:]
 image_width = image_dims[0]
@@ -27,7 +28,7 @@ conv1 = tfl.convLayer(frames_nxyc, filter_size=5, filter_depth=32, pool_size=1)
 summary = tf.reduce_max(conv1, [1, 2])
 summary = tf.expand_dims(summary, 0) # batch size 1 for now
 
-summary = tf.concat(1, [summary, actions_bn])
+summary = tf.concat(2, [summary, actions_bna])
 
 gru = tf.nn.rnn_cell.GRUCell(64)
 outputs, _ = tf.nn.dynamic_rnn(gru, summary, dtype=tf.float32)
@@ -64,6 +65,6 @@ sess = tf.Session()
 sess.run(tf.initialize_all_variables())
 
 def train(frames, actions):
-  _, l = sess.run([], feed_dict = {frames_nxy:frames, actions_n:actions})
+  _, l = sess.run([update_op, loss], feed_dict = {frames_nxy:frames, actions_n:actions})
   print(l)
 
