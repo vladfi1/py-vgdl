@@ -33,6 +33,7 @@ colors = dict(
     LIGHTGRAY = (150, 150, 150),
     DARKGRAY = (30, 30, 30),
     DARKBLUE = (20, 20, 100),
+    OFFSCREEN = None,
 ).items()
 
 colors = OrderedDict(sorted(colors, key=lambda (k, _): k))
@@ -765,7 +766,7 @@ def stepBack(sprite, partner, game):
     """ Revert last move. """
     sprite.rect = sprite.lastrect
     sprite_info = colorDict[sprite.color]
-    partner_info = colorDict[partner.color]
+    partner_info = None if partner is None else colorDict[partner.color]
     return ("stepBack",sprite_info,partner_info)
 
 def undoAll(sprite, partner, game):
