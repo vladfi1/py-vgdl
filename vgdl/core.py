@@ -207,7 +207,6 @@ class BasicGame(object):
         # rescale pixels per block to adapt to the level
         if block_size is None:
             self.block_size = max(2,int(800./max(self.width, self.height)))
-            print("block size:", self.block_size)
         else:
           self.block_size = block_size
         self.screensize = (self.width*self.block_size, self.height*self.block_size)
