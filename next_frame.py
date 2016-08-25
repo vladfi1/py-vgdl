@@ -50,21 +50,31 @@ logits = tfl.affineLayer(fc1, colorspace, bias=False)
 
 burn_in = 10 # allow the rnn to learn for a bit
 
-targets = frames_nxyc[1+burn_in:,:,:]
-logits = logits[burn_in:sequence_length-1,:,:]
+targets = frames_nxyc[1+burn_in:]
+logits = logits[burn_in:sequence_length-1]
 
-targets = tf.reshape(targets, [-1, colorspace])
-logits = tf.reshape(logits, [-1, colorspace])
+flat_targets = tf.reshape(targets, [-1, colorspace])
+flat_logits = tf.reshape(logits, [-1, colorspace])
 
-loss = tf.nn.softmax_cross_entropy_with_logits(logits, targets)
+loss = tf.nn.softmax_cross_entropy_with_logits(flat_logits, flat_targets)
 loss = tf.reduce_mean(loss)
 
 update_op = tf.train.AdamOptimizer(1e-3).minimize(loss)
 
+mle = tf.argmax(logits, 3)
+#predictions = tfl.softmax(logits)
+#flat_predictions = tf.nn.softmax(flat_logits)
+#predictions = tf.reshape(flat_predictions, tf.concat(0, [[sequence_length-burn_in-1], image_dims, [colorspace]]))
+
+saver = tf.train.Saver(tf.all_variables())
+
 sess = tf.Session()
-sess.run(tf.initialize_all_variables())
 
 def train(frames, actions):
   _, l = sess.run([update_op, loss], feed_dict = {frames_nxy:frames, actions_n:actions})
   print(l)
+
+def predict(frames, actions):
+  "Maximum-Likelihood estimates."
+  return sess.run(mle, feed_dict = {frames_nxy:frames, actions_n:actions})
 
