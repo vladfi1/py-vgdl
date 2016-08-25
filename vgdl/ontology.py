@@ -423,7 +423,7 @@ class AStarChaser(RandomNPC):
                     #logToFile('LEFT')
                     movement = LEFT
                     
-        self.physics.activeMovement(self, movement)
+            self.physics.activeMovement(self, movement)
 
 
 # ---------------------------------------------------------------------
