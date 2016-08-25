@@ -33,7 +33,8 @@ colors = dict(
     LIGHTGRAY = (150, 150, 150),
     DARKGRAY = (30, 30, 30),
     DARKBLUE = (20, 20, 100),
-    OFFSCREEN = None,
+    OFFSCREEN = "OFFSCREEN",
+    UNKNOWN = "UNKNOWN"
 ).items()
 
 colors = OrderedDict(sorted(colors, key=lambda (k, _): k))
@@ -46,6 +47,12 @@ RIGHT = (1, 0)
 BASEDIRS = [UP, LEFT, DOWN, RIGHT]
 
 colorDict = {color: name for name, color in colors.items()}
+
+def colorName(color):
+  if color not in colorDict:
+    return "UNKNOWN"
+  return colorDict[color]
+
 colorIndices = {color: index for index, color in enumerate(colors.keys())}
 
 # hack so that everything still works
@@ -526,8 +533,8 @@ class FlakAvatar(HorizontalAvatar, SpriteProducer):
 			    ## Print event tuple
 			    resources = dict(self.resources)
 			    action = "K_SPACE"
-			    agent_color = colorDict[self.color]
-			    obj_color = colorDict[spawn[0].color]
+			    agent_color = colorName(self.color)
+			    obj_color = colorName(spawn[0].color)
 			    effect = "SPAWN"
 			    event_tuple = (resources, action, [(agent_color, obj_color, effect)])
 			    #print event_tuple
@@ -747,8 +754,8 @@ def killSprite(sprite, partner, game):
     """ Kill command """
     game.kill_list.append(sprite)
     if not None in {sprite, partner}:
-        sprite_info = colorDict[sprite.color]
-        partner_info = colorDict[partner.color]
+        sprite_info = colorName(sprite.color)
+        partner_info = colorName(partner.color)
         return ("killSprite",partner_info,sprite_info) # partner = agent, sprite = what's being killed
 
 
@@ -765,22 +772,22 @@ def transformTo(sprite, partner, game, stype='wall'):
 def stepBack(sprite, partner, game):
     """ Revert last move. """
     sprite.rect = sprite.lastrect
-    sprite_info = colorDict[sprite.color]
-    partner_info = None if partner is None else colorDict[partner.color]
+    sprite_info = colorName(sprite.color)
+    partner_info = "OFFSCREEN" if partner is None else colorName(partner.color)
     return ("stepBack",sprite_info,partner_info)
 
 def undoAll(sprite, partner, game):
     """ Revert last moves of all sprites. """
-    #print 'undo', colorDict[sprite.color], colorDict[partner.color]
+    #print 'undo', colorName(sprite.color], colorName(partner.color]
     for s in game:
         s.rect = s.lastrect
-    return ('undoAll', colorDict[sprite.color], colorDict[partner.color])
+    return ('undoAll', colorName(sprite.color), colorName(partner.color))
 
 def bounceForward(sprite, partner, game):
     """ The partner sprite pushed, so if possible move in the opposite direction. """
     sprite.physics.activeMovement(sprite, unitVector(partner.lastdirection))
     game._updateCollisionDict(sprite)
-    return ('bounceForward', colorDict[partner.color], colorDict[sprite.color])
+    return ('bounceForward', colorName(partner.color), colorName(sprite.color))
 
 
 def conveySprite(sprite, partner, game):
@@ -893,17 +900,17 @@ def collectResource(sprite, partner, game):
     assert isinstance(sprite, Resource)
     r = sprite.resourceType
     partner.resources[r] = max(-1, min(partner.resources[r]+sprite.value, game.resources_limits[r]))
-    #print 'Collected ', colorDict[sprite.color]#partner.resources[r]
-    return ('collectResource', colorDict[partner.color], colorDict[sprite.color])
+    #print 'Collected ', colorName(sprite.color]#partner.resources[r]
+    return ('collectResource', colorName(partner.color), colorName(sprite.color))
 
 def changeResource(sprite, partner, game, resource, value=1):
     """ Increments a specific resource type in sprite """
     sprite.resources[resource] = max(-1, min(sprite.resources[resource]+value, game.resources_limits[resource]))
     #print resource, sprite.resources[resource]
-    #print 'Changed ', colorDict[partner.color]
+    #print 'Changed ', colorName(partner.color]
 
     # NOTE: partner is the color of the resource (see _eventHandling() in core.py)
-    return ('changeResource', colorDict[sprite.color], colorDict[partner])#, value)
+    return ('changeResource', colorName(sprite.color), colorName(partner))#, value)
 
 def spawnIfHasMore(sprite, partner, game, resource, stype, limit=1):
     """ If 'sprite' has more than a limit of the resource type given, it spawns a sprite of 'stype'. """
