@@ -70,6 +70,15 @@ saver = tf.train.Saver(tf.all_variables())
 
 sess = tf.Session()
 
+def init():
+  sess.run(tf.initialize_all_variables())
+
+def save(path):
+  saver.save(sess, path + 'snapshot')
+
+def restore(path):
+  saver.restore(sess, path + 'snapshot')
+
 def train(frames, actions):
   _, l = sess.run([update_op, loss], feed_dict = {frames_nxy:frames, actions_n:actions})
   print(l)

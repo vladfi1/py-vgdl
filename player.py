@@ -97,46 +97,7 @@ class Player(object):
       assert(frame.shape == frames[0].shape)
     
     frames = np.array(frames)
+    frames = np.apply_along_axis(colorIndex, 3, frames)
     
     return frames, actions, events
-
-import next_frame
-
-from games import games
-
-players = [Player(*game) for game in games]
-
-def colorize(pixels):
-  f = np.vectorize(indexColor, otypes=3 * [np.uint8])
-  return np.stack(f(pixels), axis=-1)
-
-def writeVideo(path, video):
-  from PIL import Image
-  
-  for i, image in enumerate(video):
-    image = np.swapaxes(image, 0, 1)
-    img = Image.fromarray(image, 'RGB')
-    img.save(path + '%d.png' % i)
-
-for i in range(1000):
-  for _ in range(50):
-    player = random.choice(players)
-    frames, actions, events = player.play(50)
-    next_frame.train(frames, actions)
-  
-  player = random.choice(players)
-  frames, actions, events = player.play(50, movie=True)
-  frames_ = np.apply_along_axis(colorIndex, 3, frames)
-  predictions = next_frame.predict(frames_, actions)
-  frames_ = frames_[-len(predictions):]
-
-  # concat along y axis
-  joined = np.concatenate([frames_, predictions], 2)
-  video = colorize(joined)
-  
-  path = 'predictions/%d/' % i
-  import os
-  if not os.path.exists(path):
-    os.makedirs(path)
-  writeVideo(path, video)
 
