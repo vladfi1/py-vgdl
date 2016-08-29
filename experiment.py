@@ -22,13 +22,13 @@ def run(iters=1000, steps=50):
   for i in range(iters):
     for _ in range(steps):
       player = random.choice(players)
-      frames, actions, events = player.play(50)
+      frames, actions, events = player.play(next_frame.sequence_length)
       next_frame.train(frames, actions)
     
     next_frame.save('next_frame/')
     
     player = random.choice(players)
-    frames, actions, events = player.play(50)
+    frames, actions, events = player.play(next_frame.sequence_length)
     predictions = next_frame.predict(frames, actions)
     frames = frames[-len(predictions):]
 
