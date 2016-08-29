@@ -39,8 +39,10 @@ outputs = tf.squeeze(outputs, squeeze_dims=[0])
 # tile across width and height
 outputs = tf.expand_dims(outputs, 1)
 outputs = tf.expand_dims(outputs, 1)
+
 # need a recent tf for shape inference to get this
 outputs = tf.tile(outputs, tf.concat(0, [[1], image_dims, [1]]))
+outputs.set_shape([sequence_length, None, None, 64])
 
 # lots of intermediate reshaping here
 # which could be done only once, at the beginning
@@ -50,8 +52,8 @@ logits = tfl.affineLayer(fc1, colorspace, bias=False)
 
 burn_in = 10 # allow the rnn to learn for a bit
 
-targets = frames_nxyc[1+burn_in:]
-logits = logits[burn_in:sequence_length-1]
+targets = frames_nxyc[1+burn_in:,:,:,:]
+logits = logits[burn_in:sequence_length-1,:,:,:]
 
 flat_targets = tf.reshape(targets, [-1, colorspace])
 flat_logits = tf.reshape(logits, [-1, colorspace])
