@@ -689,23 +689,12 @@ class VGDLSprite(object):
     def _draw(self, game):
         from ontology import LIGHTGREEN
         screen = game.screen
-        if self.shrinkfactor != 0:
-            shrunk = self.rect.inflate(-self.rect.width*self.shrinkfactor,
-                                       -self.rect.height*self.shrinkfactor)
-        else:
-            shrunk = self.rect
-
-        if self.is_avatar:
-            rounded = roundedPoints(shrunk)
-            pygame.draw.polygon(screen, self.color, rounded)
-            pygame.draw.lines(screen, LIGHTGREEN, True, rounded, 2)
-            r = self.rect.copy()
-        elif not self.is_static:
-            rounded = roundedPoints(shrunk)
-            pygame.draw.polygon(screen, self.color, rounded)
+        
+        if self.is_avatar or not self.is_static:
+            pygame.draw.rect(screen, self.color, self.rect)
             r = self.rect.copy()
         else:
-            r = screen.fill(self.color, shrunk)
+            r = screen.fill(self.color, self.rect)
         if self.resources:
             self._drawResources(game, screen, shrunk)
         VGDLSprite.dirtyrects.append(r)
